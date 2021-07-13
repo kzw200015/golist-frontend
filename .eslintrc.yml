@@ -3,7 +3,7 @@ env:
   es2021: true
 extends:
   - "eslint:recommended"
-  - "plugin:vue/essential"
+  - "plugin:vue/vue3-essential"
   - "plugin:@typescript-eslint/recommended"
 parser: "vue-eslint-parser"
 parserOptions:
@@ -12,4 +12,7 @@ parserOptions:
 plugins:
   - vue
   - "@typescript-eslint"
-rules: {}
+rules:
+  quotes:
+    - 1
+    - single

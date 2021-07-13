@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from 'axios'
 
 export const backendURL = import.meta.env.VITE_BACKEND ?? ''
 
@@ -14,7 +14,8 @@ export interface PathInfo {
 export interface PathItemInfo {
     name: string
     path: string
-    isDir: boolean
+    isDir?: boolean
+    mimeType?: string
 }
 
 export const api = {
@@ -26,5 +27,8 @@ export const api = {
         })
 
         return resp.data
+    },
+    getDirectURL(path: string): string {
+        return backendURL + '/file' + path
     }
 }

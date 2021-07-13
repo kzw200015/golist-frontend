@@ -1,9 +1,9 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router"
-import ItemList from "../components/ItemList.vue"
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import ItemList from '../components/ItemList.vue'
 
 const routes: Array<RouteRecordRaw> = [
     {
-        path: "/",
+        path: '/',
         component: ItemList,
         props: route => ({ path: route.query.path })
     }

@@ -1,6 +1,12 @@
 <template>
-  <el-table :data="pathInfo.items" @row-click="handleRowClick">
-    <el-table-column prop="name" label="文件名">
+  <el-table
+    :show-header="false"
+    :data="pathInfo.items"
+    @row-click="handleRowClick"
+    :cell-style="{ cursor: 'pointer' }"
+    v-loading.fullscreen.lock="loading"
+  >
+    <el-table-column prop="name" label="文件名" show-overflow-tooltip>
       <template #default="scope">
         <span v-if="scope.row.isDir" class="el-icon-folder"></span>
         <span v-else class="el-icon-tickets"></span
@@ -8,37 +14,63 @@
       </template>
     </el-table-column>
   </el-table>
+
+  <Preview
+    :pathItemInfo="currentPathItemInfo"
+    v-model:visible="previewVisible"
+  ></Preview>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { api, backendURL, PathInfo, PathItemInfo } from "../api"
-import { ElTable, ElTableColumn } from "element-plus"
+import { api, PathInfo, PathItemInfo } from '../api'
+import { ElTable, ElTableColumn, ElMessage } from 'element-plus'
+import Preview from './preview/Preview.vue'
 
 export default defineComponent({
-  props: ['path'],
-  components: { ElTable, ElTableColumn },
+  props: {
+    path: {
+      type: String,
+      required: true
+    }
+  },
+  components: { ElTable, ElTableColumn, Preview },
   data() {
     return {
-      pathInfo: {} as PathInfo
+      pathInfo: {} as PathInfo,
+      loading: false,
+      previewVisible: false,
+      currentPathItemInfo: {} as PathItemInfo
     }
   },
   methods: {
     handleRowClick(row: unknown) {
-      const r = row as PathItemInfo
-      if (r.isDir) {
-        this.$router.push({ path: '/', query: { path: r.path } })
+      const p = row as PathItemInfo
+      if (p.isDir) {
+        this.$router.push({ path: '/', query: { path: p.path } })
       } else {
-        window.location.href = backendURL + '/file' + r.path
+        // window.location.href = api.getDirectURL(p.path)
+        this.currentPathItemInfo = p
+        this.previewVisible = true
+      }
+    },
+    async loadData(path: string) {
+      this.loading = true
+      try {
+        this.pathInfo = await api.getPathInfo(path)
+      } catch (err) {
+        ElMessage.error(err.message)
+      } finally {
+        this.loading = false
       }
     }
   },
   async mounted() {
-    this.pathInfo = await api.getPathInfo(this.path)
+    await this.loadData(this.path)
   },
   watch: {
     async path(path: string) {
-      this.pathInfo = await api.getPathInfo(path)
+      await this.loadData(path)
     }
   }
 })
