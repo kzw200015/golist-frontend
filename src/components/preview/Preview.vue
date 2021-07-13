@@ -4,11 +4,12 @@
     destroy-on-close
     custom-class="dialog"
     center
+    top="10vh"
   >
     <template #title>
       <span>{{ pathItemInfo.name }}</span>
     </template>
-    <el-scrollbar max-height="40vh">
+    <el-scrollbar max-height="60vh">
       <VideoPreview
         v-if="pathItemInfo.mimeType?.startsWith('video')"
         :src="previewSrc"
