@@ -12,33 +12,35 @@
     <el-scrollbar max-height="60vh">
       <VideoPreview
         v-if="pathItemInfo.mimeType?.startsWith('video')"
-        :src="previewSrc"
+        :src="directLink"
       ></VideoPreview>
       <ImgPreview
         v-else-if="pathItemInfo.mimeType?.startsWith('image')"
-        :src="previewSrc"
+        :src="directLink"
       ></ImgPreview>
       <TextPreview
         v-else-if="
           pathItemInfo.mimeType?.startsWith('text') ||
           pathItemInfo.mimeType?.endsWith('json')
         "
-        :src="previewSrc"
+        :src="directLink"
       ></TextPreview>
+      <AudioPreview
+        v-else-if="pathItemInfo.mimeType?.startsWith('audio')"
+        :src="directLink"
+        :type="pathItemInfo.mimeType"
+      ></AudioPreview>
       <div v-else>该文件不支持预览</div>
     </el-scrollbar>
     <template #footer>
-      <el-button @click="handleDownload">下载</el-button>
+      <a :href="directLink"><el-button>下载</el-button></a>
     </template>
   </el-dialog>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineAsyncComponent, defineComponent, PropType } from 'vue'
 import { ElDialog, ElButton, ElScrollbar } from 'element-plus'
 import { api, PathItemInfo } from '../../api'
-import VideoPreview from './VideoPreview.vue'
-import ImgPreview from './ImgPreview.vue'
-import TextPreview from './TextPreview.vue'
 
 export default defineComponent({
   props: {
@@ -51,15 +53,16 @@ export default defineComponent({
       default: false
     }
   },
-  components: { ElDialog, ElButton, VideoPreview, ImgPreview, TextPreview, ElScrollbar },
+  components: {
+    ElDialog, ElButton, ElScrollbar,
+    VideoPreview: defineAsyncComponent(() => import('./VideoPreview.vue')),
+    ImgPreview: defineAsyncComponent(() => import('./ImgPreview.vue')),
+    TextPreview: defineAsyncComponent(() => import('./TextPreview.vue')),
+    AudioPreview: defineAsyncComponent(() => import('./AudioPreview.vue'))
+  },
   data() {
     return {
       dialogVisible: false
-    }
-  },
-  methods: {
-    handleDownload() {
-      window.location.href = api.getDirectURL(this.pathItemInfo.path)
     }
   },
   watch: {
@@ -71,8 +74,8 @@ export default defineComponent({
     }
   },
   computed: {
-    previewSrc(): string {
-      return api.getDirectURL(this.pathItemInfo.path)
+    directLink(): string {
+      return api.getDirectLink(this.pathItemInfo.path)
     }
   }
 })

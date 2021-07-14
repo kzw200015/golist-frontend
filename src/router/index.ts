@@ -1,10 +1,9 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import ItemList from '../components/ItemList.vue'
 
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        component: ItemList,
+        component: () => import('../components/ItemList.vue'),
         props: route => ({ path: route.query.path })
     }
 ]
@@ -15,8 +14,9 @@ const router = createRouter({
 
 
 router.beforeEach((to, _, next) => {
-    if (to.query.path === '' || !to.query.path) {
-        next({ path: '/', query: { path: '/' } })
+    const path = to.query.path as string | undefined
+    if (!path?.startsWith('/')) {
+        next({ path: '/', query: { path: '/' + (path ?? '') } })
     } else {
         next()
     }

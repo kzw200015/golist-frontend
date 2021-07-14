@@ -22,10 +22,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineAsyncComponent, defineComponent } from 'vue'
 import { api, PathInfo, PathItemInfo } from '../api'
 import { ElTable, ElTableColumn, ElMessage } from 'element-plus'
-import Preview from './preview/Preview.vue'
 
 export default defineComponent({
   props: {
@@ -34,7 +33,11 @@ export default defineComponent({
       required: true
     }
   },
-  components: { ElTable, ElTableColumn, Preview },
+  components: {
+    ElTable,
+    ElTableColumn,
+    Preview: defineAsyncComponent(() => import('./preview/Preview.vue'))
+  },
   data() {
     return {
       pathInfo: {} as PathInfo,
@@ -49,16 +52,17 @@ export default defineComponent({
       if (p.isDir) {
         this.$router.push({ path: '/', query: { path: p.path } })
       } else {
-        // window.location.href = api.getDirectURL(p.path)
         this.currentPathItemInfo = p
         this.previewVisible = true
       }
     },
     async loadData(path: string) {
       this.loading = true
+
       try {
         this.pathInfo = await api.getPathInfo(path)
       } catch (err) {
+        console.log(err)
         ElMessage.error(err.message)
       } finally {
         this.loading = false

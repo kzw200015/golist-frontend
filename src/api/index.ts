@@ -1,9 +1,9 @@
 import axios from 'axios'
 
-export const backendURL = import.meta.env.VITE_BACKEND ?? ''
+export const backendURL = (import.meta.env.VITE_BACKEND ?? '') + '/api'
 
 const backend = axios.create({
-    baseURL: backendURL + '/api'
+    baseURL: backendURL
 })
 
 export interface PathInfo {
@@ -28,7 +28,13 @@ export const api = {
 
         return resp.data
     },
-    getDirectURL(path: string): string {
-        return backendURL + '/file' + path
+    getDirectLink(path: string): string {
+        return axios.getUri({
+            method: 'GET',
+            url: backendURL + '/down',
+            params: {
+                path: path
+            }
+        })
     }
 }
